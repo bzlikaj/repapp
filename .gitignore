@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.pys
+*.so
+*.egg-info/
+
+# Virtual env
+.venv/
+venv/
+ENV/
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.spec
+
+# App outputs
+output/
+*.pdf
+*.xlsx
+
+# Local/runtime data
+pwa_data/exports/
+# opzionale: se non vuoi versionare la config locale, lascia la riga sotto attiva
+pwa_data/config.json
+
+# Archives
+*.zip

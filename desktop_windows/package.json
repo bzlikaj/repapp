@@ -1,0 +1,28 @@
+{
+  "name": "repapp-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wrapper desktop Windows per la PWA Calendario Reperibilita",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.repapp.calendario",
+    "productName": "Calendario Reperibilita",
+    "files": [
+      "main.js",
+      "preload.js"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}

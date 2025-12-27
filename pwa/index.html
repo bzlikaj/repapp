@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calendario di reperibilità con gestione tecnici e aiutanti">
+    <meta name="theme-color" content="#2C3E50">
+    <title>Calendario Reperibilità 2026</title>
+    
+    <!-- Manifest per PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%232C3E50' width='192' height='192'/><text x='50%' y='50%' font-size='100' fill='white' text-anchor='middle' dy='.3em'>📅</text></svg>">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📅 Calendario Reperibilità 2026</h1>
+                <p>Gestisci tecnici, aiutanti e distribuzioni</p>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="calendario">Calendario</button>
+            <button class="tab-btn" data-tab="tecnici">Tecnici</button>
+            <button class="tab-btn" data-tab="aiutanti">Aiutanti</button>
+            <button class="tab-btn" data-tab="ferie">Ferie</button>
+            <button class="tab-btn" data-tab="esporta">Esporta</button>
+        </nav>
+
+        <!-- TAB 1: CALENDARIO -->
+        <section id="calendario" class="tab-content active">
+            <div class="section-header">
+                <h2>📊 Calendario Mensile</h2>
+                <button class="btn btn-primary" id="regenerate-calendar">Rigenera Calendario</button>
+            </div>
+
+            <div id="calendar-container" class="calendar-grid">
+                <!-- Seleziona il mese -->
+                <div class="month-selector">
+                    <input type="number" id="year-input" min="2026" step="1" style="max-width: 120px; margin-right: 10px;" />
+                    <select id="month-select">
+                        <option value="1">Gennaio</option>
+                        <option value="2">Febbraio</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Aprile</option>
+                        <option value="5">Maggio</option>
+                        <option value="6">Giugno</option>
+                        <option value="7">Luglio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Settembre</option>
+                        <option value="10">Ottobre</option>
+                        <option value="11">Novembre</option>
+                        <option value="12">Dicembre</option>
+                    </select>
+                </div>
+                <div id="month-calendar" class="month-view"></div>
+            </div>
+
+            <div class="stats-container">
+                <h3>📈 Statistiche Distribuzioni</h3>
+                <div id="stats-table" class="stats-table"></div>
+            </div>
+        </section>
+
+        <!-- TAB 2: TECNICI -->
+        <section id="tecnici" class="tab-content">
+            <div class="section-header">
+                <h2>👥 Gestione Tecnici</h2>
+                <p>Aggiungi o rimuovi tecnici dal calendario</p>
+            </div>
+
+            <div class="form-group">
+                <label for="new-tecnico">Nuovo Tecnico:</label>
+                <div class="input-group">
+                    <input type="text" id="new-tecnico" placeholder="Es. Rossi Mario">
+                    <button class="btn btn-success" id="add-tecnico">Aggiungi</button>
+                </div>
+            </div>
+
+            <div class="tecnici-list">
+                <h3>Tecnici Attuali:</h3>
+                <ul id="tecnici-lista">
+                    <!-- Generato dinamicamente -->
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <strong>ℹ️ Nota:</strong> Dopo aver modificato i tecnici, torna al tab "Calendario" e clicca "Rigenera Calendario" per aggiornare le assegnazioni.
+            </div>
+        </section>
+
+        <!-- TAB 3: AIUTANTI -->
+        <section id="aiutanti" class="tab-content">
+            <div class="section-header">
+                <h2>🤝 Gestione Aiutanti</h2>
+                <p>Aggiungi aiutanti e configura mesi/giorni in cui serve l'aiutante</p>
+            </div>
+
+            <!-- Sezione Aggiungi Aiutante -->
+            <div class="form-group">
+                <label for="new-aiutante">Nuovo Aiutante:</label>
+                <div class="input-group">
+                    <input type="text" id="new-aiutante" placeholder="Es. Mario Rossi">
+                    <button class="btn btn-success" id="add-aiutante">Aggiungi</button>
+                </div>
+            </div>
+
+            <!-- Lista Aiutanti -->
+            <div class="aiutanti-list">
+                <h3>Aiutanti Attuali (Rotazione):</h3>
+                <ul id="aiutanti-lista">
+                    <!-- Generato dinamicamente -->
+                </ul>
+            </div>
+
+            <!-- Selezione Giorni -->
+            <div class="giorni-aiutanti-section">
+                <h3>Seleziona mesi:</h3>
+                <div class="giorni-checkbox" id="mesi-checkbox">
+                    <!-- Generato dinamicamente -->
+                </div>
+
+                <h3 style="margin-top: 15px;">Giorni della settimana (opzionale):</h3>
+                <div class="giorni-checkbox" id="settimana-checkbox">
+                    <!-- Generato dinamicamente -->
+                </div>
+
+                <h3 style="margin-top: 15px;">Modalità:</h3>
+                <div class="giorni-checkbox" id="mode-aiutanti">
+                    <label class="checkbox-label">
+                        <input type="radio" name="mode-aiutanti" value="all" checked>
+                        <span>Tutti i giorni dei mesi selezionati</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="radio" name="mode-aiutanti" value="specific">
+                        <span>Solo giorni specifici (del mese)</span>
+                    </label>
+                </div>
+
+                <div id="giorni-mese-wrapper" style="display:none; margin-top: 15px;">
+                    <h3>Seleziona giorni del mese:</h3>
+                    <div class="giorni-checkbox" id="giorni-mese-checkbox">
+                        <!-- Generato dinamicamente -->
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="save-date-aiutanti" style="margin-top: 10px;">Salva Programmazione</button>
+                <div class="info-box" id="date-aiutanti-summary" style="margin-top: 12px;"></div>
+            </div>
+
+            <div class="aiutanti-help">
+                <h3>💡 Come funziona:</h3>
+                <ul>
+                    <li>Aggiungi gli aiutanti (persone diverse dai tecnici principali)</li>
+                    <li>Seleziona i mesi in cui serve l'aiutante</li>
+                    <li>Scegli se includere tutti i giorni del mese oppure solo alcuni giorni (es. 1, 15, 30)</li>
+                    <li>Gli aiutanti girano a turno sulle date selezionate</li>
+                    <li>Nel calendario vedrai: "Likaj + pavanello" quando l'aiutante è previsto in quella data</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- TAB 4: FERIE -->
+        <section id="ferie" class="tab-content">
+            <div class="section-header">
+                <h2>🏖️ Ferie Tecnici</h2>
+                <p>Imposta periodi di ferie: in quei giorni il tecnico non sarà assegnato in reperibilità</p>
+            </div>
+
+            <div class="form-group">
+                <label>Tipo:</label>
+                <div class="input-group" style="gap:10px;">
+                    <label class="checkbox-label" style="display:flex; align-items:center; gap:6px;">
+                        <input type="radio" name="ferie-tipo" value="tecnico" checked>
+                        <span>Tecnico</span>
+                    </label>
+                    <label class="checkbox-label" style="display:flex; align-items:center; gap:6px;">
+                        <input type="radio" name="ferie-tipo" value="aiutante">
+                        <span>Aiutante</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="ferie-tecnico">Persona:</label>
+                <div class="input-group">
+                    <select id="ferie-tecnico"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Periodo:</label>
+                <div class="input-group">
+                    <input type="date" id="ferie-dal">
+                    <input type="date" id="ferie-al">
+                    <button class="btn btn-success" id="add-ferie">Aggiungi</button>
+                </div>
+            </div>
+
+            <div class="tecnici-list">
+                <h3>Ferie Inserite:</h3>
+                <ul id="ferie-lista">
+                    <!-- Generato dinamicamente -->
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <strong>ℹ️ Nota:</strong> Dopo aver aggiunto/rimosso ferie, torna al tab "Calendario" e clicca "Rigenera Calendario".
+            </div>
+        </section>
+
+        <!-- TAB 5: ESPORTA -->
+        <section id="esporta" class="tab-content">
+            <div class="section-header">
+                <h2>💾 Esporta Calendario</h2>
+                <p>Scarica il calendario in vari formati</p>
+            </div>
+
+            <div class="export-buttons">
+                <button class="btn btn-large btn-pdf" id="export-pdf">
+                    📄 Scarica PDF
+                </button>
+                <button class="btn btn-large btn-excel" id="export-excel">
+                    📊 Scarica Excel
+                </button>
+            </div>
+
+            <div class="export-info">
+                <h3>📋 Formati disponibili:</h3>
+                <ul>
+                    <li><strong>PDF:</strong> Calendario stampabile con layout mensile</li>
+                    <li><strong>Excel:</strong> Foglio di calcolo modificabile con tutti i dati</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="loading-spinner hidden">
+        <div class="spinner"></div>
+        <p>Elaborazione in corso...</p>
+    </div>
+
+    <script>
+        // Service Worker registration per PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js?v=10')
+                .then(reg => reg.update())
+                .catch(err => console.log('Service Worker registration failed:', err));
+        }
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

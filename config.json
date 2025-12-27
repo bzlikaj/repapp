@@ -1,0 +1,97 @@
+{
+  "anno": 2026,
+  "tecnici": [
+    "Likaj",
+    "Ferraris",
+    "Zanotto",
+    "Casazza",
+    "Mancin",
+    "Dardha",
+    "Franchini",
+    "Giraldin",
+    "Terazzi"
+  ],
+  "festivi": [
+    {
+      "data": "2026-01-01",
+      "nome": "Capodanno",
+      "assegnato_a": "Dardha",
+      "obbligatorio": true
+    },
+    {
+      "data": "2026-01-06",
+      "nome": "Epifania",
+      "assegnato_a": null,
+      "obbligatorio": false
+    },
+    {
+      "data": "2026-04-12",
+      "nome": "Pasqua",
+      "assegnato_a": null,
+      "obbligatorio": false
+    },
+    {
+      "data": "2026-04-13",
+      "nome": "Lunedì dell'Angelo",
+      "assegnato_a": null,
+      "obbligatorio": false
+    },
+    {
+      "data": "2026-04-25",
+      "nome": "Festa della Liberazione",
+      "assegnato_a": null,
+      "obbligatorio": false
+    },
+    {
+      "data": "2026-05-01",
+      "nome": "Festa del Lavoro",
+      "assegnato_a": null,
+      "obbligatorio": false
+    },
+    {
+      "data": "2026-06-02",
+      "nome": "Festa della Repubblica",
+      "assegnato_a": null,
+      "obbligatorio": false
+    },
+    {
+      "data": "2026-08-15",
+      "nome": "Ferragosto",
+      "assegnato_a": null,
+      "obbligatorio": false
+    },
+    {
+      "data": "2026-11-01",
+      "nome": "Ognissanti",
+      "assegnato_a": null,
+      "obbligatorio": false
+    },
+    {
+      "data": "2026-12-08",
+      "nome": "Immacolata Concezione",
+      "assegnato_a": null,
+      "obbligatorio": false
+    },
+    {
+      "data": "2026-12-25",
+      "nome": "Natale",
+      "assegnato_a": null,
+      "obbligatorio": false
+    },
+    {
+      "data": "2026-12-26",
+      "nome": "Santo Stefano",
+      "assegnato_a": null,
+      "obbligatorio": false
+    }
+  ],
+  "regole": {
+    "giorni_blocco": 7,
+    "descrizione": "Giorni prima e dopo un turno importante (weekend/festivo) in cui il tecnico non può essere assegnato"
+  },
+  "output": {
+    "cartella": "output",
+    "nome_file": "calendario_reperibilita_2026.pdf",
+    "formato": "PDF"
+  }
+}
