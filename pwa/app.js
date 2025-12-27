@@ -102,6 +102,8 @@ function setupEventListeners() {
     // Export
     document.getElementById('export-pdf').addEventListener('click', exportPDF);
     document.getElementById('export-excel').addEventListener('click', exportExcel);
+    const exportConfigBtn = document.getElementById('export-config');
+    if (exportConfigBtn) exportConfigBtn.addEventListener('click', exportConfig);
 
     // Ferie
     document.getElementById('add-ferie').addEventListener('click', addFerie);
@@ -711,6 +713,12 @@ async function exportExcel() {
     showLoading(true);
     const anno = getSelectedYear();
         window.location.href = `${API_BASE}/exports/excel?anno=${encodeURIComponent(String(anno))}&ts=${Date.now()}`;
+    setTimeout(() => showLoading(false), 2000);
+}
+
+async function exportConfig() {
+    showLoading(true);
+        window.location.href = `${API_BASE}/exports/config?ts=${Date.now()}`;
     setTimeout(() => showLoading(false), 2000);
 }
 

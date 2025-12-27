@@ -606,6 +606,32 @@ def export_excel():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/exports/config', methods=['GET'])
+def export_config():
+    """Esporta i salvataggi (config/ferie/rotazioni/cache) in JSON."""
+    try:
+        config = leggi_config()
+        exported_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        payload = {
+            "exported_at": exported_at,
+            "config": config,
+        }
+        buf = io.BytesIO(json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8"))
+        buf.seek(0)
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return send_file(
+            buf,
+            mimetype="application/json",
+            as_attachment=True,
+            download_name=f"repapp_salvataggi_{ts}.json",
+            conditional=False,
+            max_age=0,
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/calendario/rigenerare', methods=['POST'])
 def rigenera_calendario():
     """Rigenera il calendario usando la configurazione corrente."""
