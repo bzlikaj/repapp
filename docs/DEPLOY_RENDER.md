@@ -24,9 +24,9 @@ Questi passi ti danno un link pubblico (HTTPS) in pochi minuti.
 
 ## Dati persistenti (config/ferie/stati rotazione)
 
-- Render monta un disco su `/data`.
-- L’app usa la variabile `REPAPP_DATA_DIR=/data` (già configurata in `render.yaml`).
-- In questo modo `pwa_data/config.json` e gli export rimangono persistenti tra riavvii e deploy.
+- **Piano Free:** i dischi persistenti non sono supportati. In questa configurazione l’app usa `REPAPP_DATA_DIR=/tmp/repapp-data`.
+   - I dati (config/ferie/rotazioni/export) possono andare persi in caso di redeploy o reset dell’istanza.
+- **Piani che supportano dischi:** puoi aggiungere un disk (es. mount `/data`) e impostare `REPAPP_DATA_DIR=/data` in `render.yaml` per avere persistenza.
 
 ## Aggiornamenti
 
