@@ -3,7 +3,7 @@ Modulo per la generazione del PDF del calendario di reperibilità.
 """
 
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.colors import HexColor, white, black, red, blue, lightgrey
+from reportlab.lib.colors import HexColor, white, black, lightgrey
 from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -15,12 +15,18 @@ from typing import Dict, Tuple
 
 class PDFCalendarioGenerator:
     """Genera un PDF del calendario di reperibilità."""
-    
-    # Colori per le tipologie - più vivaci
+
+    # Impostazioni layout (solo estetica)
+    PAGE_MARGIN_CM = 0.8
+    COL_WIDTH_CM = 2.75  # 7 colonne -> 19.25 cm, entra con margini
+    HEADER_HEIGHT_CM = 0.55
+    CELL_HEIGHT_CM = 1.9
+
+    # Colori per le tipologie - palette più sobria/leggibile
     COLORI = {
-        "festivo": HexColor("#FF4757"),       # Rosso vivace
-        "weekend": HexColor("#00B4DB"),       # Blu vivace
-        "feriale": HexColor("#F8F9FA"),       # Grigio molto chiaro
+        "festivo": HexColor("#E74C3C"),       # Rosso
+        "weekend": HexColor("#3498DB"),       # Blu
+        "feriale": HexColor("#F4F6F7"),       # Grigio molto chiaro
         "": HexColor("#FFFFFF")               # Bianco (nessun turno)
     }
     
@@ -36,6 +42,7 @@ class PDFCalendarioGenerator:
         self.calendario = calendario
         self.output_path = output_path
         self.anno = int(getattr(calendario, "anno", 2026) or 2026)
+        self._generated_at = datetime.now()
         # Cache delle assegnazioni per allineare il PDF alla stessa fonte dati dell'API/UI
         try:
             self._assegnazioni = dict(getattr(calendario, "assegnazioni", {}) or {})
@@ -62,10 +69,10 @@ class PDFCalendarioGenerator:
         doc = SimpleDocTemplate(
             temp_path,
             pagesize=A4,
-            rightMargin=0.5*cm,
-            leftMargin=0.5*cm,
-            topMargin=0.5*cm,
-            bottomMargin=0.5*cm
+            rightMargin=self.PAGE_MARGIN_CM * cm,
+            leftMargin=self.PAGE_MARGIN_CM * cm,
+            topMargin=self.PAGE_MARGIN_CM * cm,
+            bottomMargin=self.PAGE_MARGIN_CM * cm,
         )
         
         elements = []
@@ -77,46 +84,40 @@ class PDFCalendarioGenerator:
             parent=styles['Heading1'],
             fontSize=16,
             textColor=black,
-            spaceAfter=6,
+            spaceAfter=4,
             alignment=1  # Centrato
         )
         
         elements.append(Paragraph(f"CALENDARIO DI REPERIBILITÀ {self.anno}", title_style))
         elements.append(Spacer(1, 0.3*cm))
         
-        # Legenda
-        legenda_style = ParagraphStyle(
-            'Legenda',
+        # Legenda (più pulita, senza emoji)
+        legenda_text_style = ParagraphStyle(
+            'LegendaText',
             parent=styles['Normal'],
-            fontSize=9,
-            spaceAfter=6
+            fontName='Helvetica',
+            fontSize=8.5,
+            leading=10,
         )
-        
-        legenda_items = [
-            f"<b>🔴 FESTIVO:</b> GIORNI FESTIVI NAZIONALI (BLOCCO ±7 GIORNI)",
-            f"<b>🔵 WEEKEND:</b> SABATO + DOMENICA INSIEME (BLOCCO ±7 GIORNI)",
-            f"<b>⚪ FERIALE:</b> LUNEDÌ-VENERDÌ (NESSUN BLOCCO)",
+
+        legenda_table_data = [
+            ["", Paragraph("<b>FESTIVO</b>: Giorni festivi nazionali (blocco ±7 giorni)", legenda_text_style)],
+            ["", Paragraph("<b>WEEKEND</b>: Sabato + Domenica insieme (blocco ±7 giorni)", legenda_text_style)],
+            ["", Paragraph("<b>FERIALE</b>: Lunedì–Venerdì (nessun blocco)", legenda_text_style)],
         ]
-        
-        legenda_table_data = [[legenda_items[0]], [legenda_items[1]], [legenda_items[2]]]
-        legenda_table = Table(legenda_table_data, colWidths=[17*cm])
+        legenda_table = Table(legenda_table_data, colWidths=[0.55 * cm, 18.2 * cm])
         legenda_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (0, 0), HexColor("#FF4757")),
-            ('TEXTCOLOR', (0, 0), (0, 0), white),
-            ('FONTSIZE', (0, 0), (0, 0), 8),
-            ('PADDING', (0, 0), (0, 0), 6),
-            
-            ('BACKGROUND', (0, 1), (0, 1), HexColor("#00B4DB")),
-            ('TEXTCOLOR', (0, 1), (0, 1), white),
-            ('FONTSIZE', (0, 1), (0, 1), 8),
-            ('PADDING', (0, 1), (0, 1), 6),
-            
-            ('BACKGROUND', (0, 2), (0, 2), HexColor("#F8F9FA")),
-            ('TEXTCOLOR', (0, 2), (0, 2), HexColor("#2C3E50")),
-            ('FONTSIZE', (0, 2), (0, 2), 8),
-            ('PADDING', (0, 2), (0, 2), 6),
-            
-            ('GRID', (0, 0), (-1, -1), 1, black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+
+            ('BACKGROUND', (0, 0), (0, 0), self.COLORI['festivo']),
+            ('BACKGROUND', (0, 1), (0, 1), self.COLORI['weekend']),
+            ('BACKGROUND', (0, 2), (0, 2), self.COLORI['feriale']),
+            ('BOX', (0, 0), (-1, -1), 0.75, HexColor('#2C3E50')),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, HexColor('#BDC3C7')),
         ]))
         
         elements.append(legenda_table)
@@ -130,8 +131,8 @@ class PDFCalendarioGenerator:
             pagina_mese = self._crea_pagina_mese(mese, styles)
             elements.extend(pagina_mese)
         
-        # Build del documento
-        doc.build(elements)
+        # Build del documento con footer
+        doc.build(elements, onFirstPage=self._draw_page_decorations, onLaterPages=self._draw_page_decorations)
         
         # Sposta il file temporaneo al percorso finale
         import shutil
@@ -154,6 +155,28 @@ class PDFCalendarioGenerator:
         
         print(f"PDF generato: {self.output_path}")
 
+    def _draw_page_decorations(self, c: canvas.Canvas, doc: SimpleDocTemplate):
+        """Disegna footer (pagina + data generazione) su ogni pagina."""
+        c.saveState()
+        page_num = c.getPageNumber()
+        total_pages = 12
+
+        footer_y = self.PAGE_MARGIN_CM * cm * 0.55
+        left_x = doc.leftMargin
+        right_x = doc.pagesize[0] - doc.rightMargin
+
+        c.setStrokeColor(HexColor('#BDC3C7'))
+        c.setLineWidth(0.5)
+        c.line(left_x, footer_y + 6, right_x, footer_y + 6)
+
+        c.setFont('Helvetica', 8)
+        c.setFillColor(HexColor('#7F8C8D'))
+        c.drawString(left_x, footer_y, f"Calendario reperibilità {self.anno}")
+
+        gen = self._generated_at.strftime('%d/%m/%Y')
+        c.drawRightString(right_x, footer_y, f"Generato il {gen}  ·  Pagina {page_num}/{total_pages}")
+        c.restoreState()
+
     def _crea_cella_giorno(self, giorno: int, tecnico: str, aiutante: str) -> object:
         """Crea il contenuto della cella con giorno in alto e nomi centrati."""
         from reportlab.platypus import Table, TableStyle
@@ -172,7 +195,7 @@ class PDFCalendarioGenerator:
         )
         style_names = ParagraphStyle(
             'CellNames',
-            fontName='Helvetica-Bold',
+            fontName='Helvetica',
             fontSize=8,
             leading=9,
             alignment=1,  # center
@@ -187,8 +210,8 @@ class PDFCalendarioGenerator:
         # La riga del giorno resta in alto; i nomi sono centrati verticalmente nel resto.
         inner = Table(
             [[day_par], [names_par]],
-            colWidths=[2.8 * cm],
-            rowHeights=[0.45 * cm, 1.55 * cm],
+            colWidths=[self.COL_WIDTH_CM * cm],
+            rowHeights=[0.45 * cm, (self.CELL_HEIGHT_CM - 0.45) * cm],
         )
         inner.setStyle(TableStyle([
             ('GRID', (0, 0), (-1, -1), 0, white),
@@ -215,7 +238,7 @@ class PDFCalendarioGenerator:
             parent=styles['Heading2'],
             fontSize=14,
             textColor=black,
-            spaceAfter=12,
+            spaceAfter=10,
             alignment=1
         )
         
@@ -225,9 +248,9 @@ class PDFCalendarioGenerator:
         # Crea la tabella del mese
         data = self._crea_dati_mese(mese)
         
-        # Aumenta l'altezza delle righe per contenere giorno (in alto) + nomi (centrati)
-        row_heights = [0.5 * cm] + [2.0 * cm] * (len(data) - 1)
-        table = Table(data, colWidths=[2.8 * cm] * 7, rowHeights=row_heights)
+        # Altezza righe: header + righe calendario
+        row_heights = [self.HEADER_HEIGHT_CM * cm] + [self.CELL_HEIGHT_CM * cm] * (len(data) - 1)
+        table = Table(data, colWidths=[self.COL_WIDTH_CM * cm] * 7, rowHeights=row_heights)
         
         # Stile della tabella
         table.setStyle(self._stile_tabella(mese))
@@ -309,25 +332,25 @@ class PDFCalendarioGenerator:
         from reportlab.lib.colors import HexColor, black, lightgrey
         
         stile = TableStyle([
-            # Bordi
-            ('GRID', (0, 0), (-1, -1), 1, black),
-            
+            # Bordi: esterno più marcato, griglia interna leggera
+            ('BOX', (0, 0), (-1, -1), 0.9, HexColor('#2C3E50')),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, HexColor('#BDC3C7')),
+
             # Header
-            ('BACKGROUND', (0, 0), (-1, 0), HexColor("#2C3E50")),
+            ('BACKGROUND', (0, 0), (-1, 0), HexColor('#2C3E50')),
             ('TEXTCOLOR', (0, 0), (-1, 0), white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 0), (-1, 0), 9.5),
             ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
             ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
-            ('HEIGHT', (0, 0), (-1, 0), 0.5*cm),
-            
+            ('TOPPADDING', (0, 0), (-1, 0), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 4),
+
             # Celle dati
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
-            # Il contenuto interno gestisce i nomi; manteniamo la cella "TOP" per lasciare il giorno in alto
             ('VALIGN', (0, 1), (-1, -1), 'TOP'),
-            ('HEIGHT', (0, 1), (-1, -1), 1.3*cm),
         ])
         
         # Applica colori alle celle in base al tipo di reperibilità
@@ -370,8 +393,6 @@ class PDFCalendarioGenerator:
                     col = 0
                     row += 1
         
-        # Bordi più spessi
-        stile.add('LINEWIDTH', (0, 0), (-1, -1), 0.5)
         # Padding a 0: la mini-tabella interna gestisce layout e spaziatura
         stile.add('LEFTPADDING', (0, 1), (-1, -1), 0)
         stile.add('RIGHTPADDING', (0, 1), (-1, -1), 0)
